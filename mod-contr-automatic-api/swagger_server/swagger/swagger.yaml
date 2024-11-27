@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Modulo-Automatic-Contratos-api
+  description: swcecwes
+  version: 1.0.11
+servers:
+- url: /rest/m-automaticontratos-api/v1.0/
+tags:
+- name: Archivos
+  description: Endpoint de archivos
+paths:
+  /get/archivos/carga:
+    post:
+      tags:
+      - Archivos
+      description: Procesos de Carga en Archivos
+      operationId: get_archivos_carga
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RequestArchivos'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.archivos_controller
+components:
+  schemas:
+    RequestArchivos:
+      required:
+      - archivo
+      - channel
+      - externalTransactionId
+      type: object
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        archivo:
+          type: array
+          description: Archivos en formato Excel o CSV
+          items:
+            type: string
+            format: binary
+    Response_Archivos:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+          enum:
+          - 200
+          - 400
+        file_name:
+          type: string
+          example: pepe_pancracio.xls
+        mesage:
+          type: string
+          example: El archivo fue cargado satisfactoreamente u ocurrio un problema
+            dentro de su proceso
+        internalTransactionId:
+          type: string
+          example: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId:
+          type: string
+          example: 82fb166d-c273-4840-9008-c895cf9de255
+      description: Modelo de respuesta tanto Satisfactorio como Fallido
+      example:
+        mesage: El archivo fue cargado satisfactoreamente u ocurrio un problema dentro
+          de su proceso
+        file_name: pepe_pancracio.xls
+        internalTransactionId: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId: 82fb166d-c273-4840-9008-c895cf9de255
+        status: 400
+    Response_EVArchivos:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        file_name:
+          type: string
+          example: OK
+        elementos:
+          type: array
+          example:
+          - CUENTA TITAN
+          - Referencia interna
+          - DOCUMENTO IDENTIFICACION
+          items:
+            type: string
+        internalTransactionId:
+          type: string
+          example: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId:
+          type: string
+          example: 82fb166d-c273-4840-9008-c895cf9de255
+      description: Modelo de respuesta en caso que ocurra un fallo en la validacion
+        del archivo.
+    ResponseError:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: OK
+        internalTransactionId:
+          type: string
+          example: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId:
+          type: string
+          example: 82fb166d-c273-4840-9008-c895cf9de255
+    EArchivos_400:
+      oneOf:
+      - $ref: '#/components/schemas/ResponseError'
+      - $ref: '#/components/schemas/Response_Archivos'
+      - $ref: '#/components/schemas/Response_EVArchivos'
+

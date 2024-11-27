@@ -68,7 +68,7 @@ export class AppComponent {
 
       reader.onload = (e: any) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array', sheetRows: 1  });
         const hoja = workbook.Sheets[workbook.SheetNames[0]];
 
         if (!hoja) {
