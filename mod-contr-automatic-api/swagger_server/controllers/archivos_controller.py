@@ -5,6 +5,7 @@ from flask import jsonify
 from swagger_server.models import RequestArchivos, ResponseError
 from swagger_server.models.e_archivos400 import EArchivos400  # noqa: E501
 from swagger_server.models.response_archivos import ResponseArchivos  # noqa: E501
+from swagger_server.uses_cases.files_methods import FilesMethods
 from swagger_server.uses_cases.valid_methods import ValidationMethods
 from swagger_server.utils.transactions.transaction import TransactionId
 
@@ -18,20 +19,20 @@ def get_archivos_carga(body = None):  # noqa: E501
     ]
     internal = TransactionId()
     body = RequestArchivos.from_dict(connexion.request.form)
-    archivos = connexion.request.files.getlist("archivo")
-    narchivos = []
+    files = connexion.request.files.getlist("archivo")
+    n_files = []
     try:
         if body.channel == 'automatic-contrato-web':
-            for archivo in archivos:
-                if any(archivo.filename.endswith(ext) for ext in ext_validas):
-                    if archivo.content_type in mime_validos:
-                        narchivos.append(archivo.filename)
+            for file in files:
+                if any(file.filename.endswith(ext) for ext in ext_validas):
+                    if file.content_type in mime_validos:
+                        n_files.append(file.filename)
                     else:
                         response = ResponseArchivos(
                             status=400,
                             external_transaction_id=body.external_transaction_id,
                             internal_transaction_id=internal.generate_internal_transaction_id(),
-                            file_name=archivo.filename,
+                            file_name=file.filename,
                             mesage=f'Tipo MIME inválido. Solo se permiten tipos {mime_validos}'
                         )
                         return jsonify(response), 400
@@ -40,16 +41,19 @@ def get_archivos_carga(body = None):  # noqa: E501
                         status=400,
                         external_transaction_id=body.external_transaction_id,
                         internal_transaction_id=internal.generate_internal_transaction_id(),
-                        file_name=archivo.filename,
+                        file_name=file.filename,
                         mesage=f'Archivo con Extension no valida, solo se permiten {ext_validas}'
                     )
                     return jsonify(response), 400
-            validacion = ValidationMethods.valid_formatte(archivos, internal.generate_internal_transaction_id(), body.external_transaction_id)
-            if validacion:
-                print("funciono")
+            validation_1 = ValidationMethods.valid_formatte(files)
+
+            if validation_1 is True:
+                validation_2 = ValidationMethods.valid_ci(files)
+                # new_file = FilesMethods.fusion_files(files)
             else:
-                # Si `valid_formatte` retorna un error, enviarlo
-                return jsonify(validacion), validacion["status"]
+                validation_1['external_transaction_id'] = body.external_transaction_id
+                validation_1['internal_transaction_id'] = internal.generate_internal_transaction_id()
+                return jsonify(validation_1), validation_1["status"]
 
         else:
             response = ResponseError(

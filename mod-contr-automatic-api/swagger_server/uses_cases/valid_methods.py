@@ -1,11 +1,6 @@
-from http.client import responses
-from operator import truediv
+import os
 
 import pandas as pd
-from flask import jsonify
-
-from swagger_server.models import ResponseArchivos, ResponseEVArchivos, ResponseError
-
 
 class ValidationMethods:
     # Lista de títulos válidos
@@ -21,10 +16,8 @@ class ValidationMethods:
     ]
 
     @staticmethod
-    def valid_formatte(archivos, internalTransactionId: str, externalTransactionId: str):
+    def valid_formatte(archivos):
         """ Metodo que valida el formato de cabeceras de las tablas."""
-        # Lista para almacenar los nombres de archivos validados correctamente
-        archivos_validos = []
 
         for archivo in archivos:
             try:
@@ -43,14 +36,10 @@ class ValidationMethods:
                         return {
                             'status': 400,
                             'file_name': archivo.filename,
-                            'mesage': f"Título '{encabezado}' no válido en el archivo.",
-                            'external_transaction_id': externalTransactionId,
-                            'internal_transaction_id': internalTransactionId
+                            'mesage': f"Título '{encabezado}' no válido en el archivo."
                         }
             except Exception as e:
                 return {
-                    "external_transaction_id": externalTransactionId,
-                    "internal_transaction_id": internalTransactionId,
                     "mesage": f"Error al procesar el archivo: {str(e)}",
                     "status": 500
                 }
@@ -65,6 +54,72 @@ class ValidationMethods:
         return True
 
     @staticmethod
-    def comparete_files(archivos, archivo_fusionado):
-        """Este metodo coge los archivos, obtiene los datos de cada uno y los compara con los datos del
-        archivo fusionado para verificar que el archivo no salga corrupto"""
+    def valid_ci(archivos):
+        """Este metodo carla la lista de archivos, valida las cedulas repetidas dentro de los archivos y de los archivos entre si"""
+        # Ruta para guardar o modificar el archivo de duplicados
+        ruta_duplicados = "swagger_server/files/HISTORICO_DUPLICADO.xlsx"
+
+        # Lista para almacenar registros duplicados
+        registros_duplicados = []
+
+        # Lista para combinar todas las cédulas y registros
+        data_global = []
+
+        # Cargar y validar los archivos
+        for archivo in archivos:
+            # Cargar el archivo en un DataFrame
+            df = pd.read_excel(archivo)
+
+            # Asegurar que las columnas están correctamente definidas
+            df.columns = df.columns.str.strip()
+            if "DOCUMENTO IDENTIFICACION" not in df.columns:
+                raise ValueError("El archivo no contiene la columna 'DOCUMENTO IDENTIFICACION'.")
+
+            # Ajustar las columnas al formato esperado
+            df = df[ValidationMethods.FORMATO]
+
+            # Ignorar la primera fila (cabeceras)
+            df = df.iloc[1:]
+
+            # Añadir al conjunto global
+            data_global.append(df)
+
+            # Validación interna de duplicados
+            duplicados_internos = df[df["DOCUMENTO IDENTIFICACION"].duplicated(keep=False)]
+            registros_duplicados.append(duplicados_internos)
+
+        # Validación externa (entre todos los archivos)
+        if len(data_global) > 1:
+            # Unificar todos los registros cargados
+            data_consolidada = pd.concat(data_global)
+
+            # Identificar cédulas duplicadas globalmente
+            cédulas_duplicadas_globales = data_consolidada["DOCUMENTO IDENTIFICACION"].duplicated(keep=False)
+
+            # Filtrar registros completos con duplicados
+            duplicados_externos = data_consolidada[cédulas_duplicadas_globales]
+            registros_duplicados.append(duplicados_externos)
+
+        # Consolidar los registros duplicados encontrados
+        if registros_duplicados:
+            # Combinar los registros duplicados en un único DataFrame
+            duplicados_df = pd.concat(registros_duplicados).drop_duplicates()
+
+            # Si el archivo "HISTORICO_DUPLICADO" ya existe, añadir los duplicados al archivo existente
+            if os.path.exists(ruta_duplicados):
+                historico_existente = pd.read_excel(ruta_duplicados)
+                duplicados_df = pd.concat([historico_existente, duplicados_df]).drop_duplicates()
+
+            # Guardar el archivo actualizado
+            duplicados_df.to_excel(ruta_duplicados, index=False, header=True)
+
+            return {
+                "status": 200,
+                "message": "Validación completada. Se actualizó el archivo HISTORICO_DUPLICADO.",
+                "path": ruta_duplicados,
+            }
+        else:
+            return {
+                "status": 200,
+                "message": "No se encontraron cédulas duplicadas en los archivos procesados.",
+            }
