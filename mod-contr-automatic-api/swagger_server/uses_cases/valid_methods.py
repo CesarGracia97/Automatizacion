@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 
@@ -55,71 +56,81 @@ class ValidationMethods:
 
     @staticmethod
     def valid_ci(archivos):
-        """Este metodo carla la lista de archivos, valida las cedulas repetidas dentro de los archivos y de los archivos entre si"""
-        # Ruta para guardar o modificar el archivo de duplicados
-        ruta_duplicados = "swagger_server/files/HISTORICO_DUPLICADO.xlsx"
+        """
+        Este método unifica los archivos en memoria, detecta registros duplicados según el
+        "DOCUMENTO IDENTIFICACION" y registros completamente idénticos.
+        """
+        try:
+            # Ruta base para guardar los archivos
+            base_path = os.path.join("swagger_server", "files")
+            duplicates_path = os.path.join(base_path, "DUPLICADOS")
+            no_duplicates_path = os.path.join(base_path, "NO_DUPLICADOS")
 
-        # Lista para almacenar registros duplicados
-        registros_duplicados = []
+            # Crear directorios si no existen
+            os.makedirs(duplicates_path, exist_ok=True)
+            os.makedirs(no_duplicates_path, exist_ok=True)
 
-        # Lista para combinar todas las cédulas y registros
-        data_global = []
+            # Obtener la fecha actual para los nombres de los archivos
+            fecha_actual = datetime.now().strftime("%d-%m-%Y")
+            archivo_duplicados = os.path.join(duplicates_path, f"REPORTE_DUPLICADOS_{fecha_actual}.xlsx")
+            archivo_no_duplicados = os.path.join(no_duplicates_path, f"REPORTE_NDUPLICADOS_{fecha_actual}.xlsx")
 
-        # Cargar y validar los archivos
-        for archivo in archivos:
-            # Cargar el archivo en un DataFrame
-            df = pd.read_excel(archivo)
+            # Lista para almacenar DataFrames de cada archivo
+            dataframes = []
 
-            # Asegurar que las columnas están correctamente definidas
-            df.columns = df.columns.str.strip()
-            if "DOCUMENTO IDENTIFICACION" not in df.columns:
-                raise ValueError("El archivo no contiene la columna 'DOCUMENTO IDENTIFICACION'.")
+            # Cargar y procesar cada archivo
+            for archivo in archivos:
+                if archivo.filename.endswith(".csv"):
+                    df = pd.read_csv(archivo)
+                else:
+                    df = pd.read_excel(archivo)
 
-            # Ajustar las columnas al formato esperado
-            df = df[ValidationMethods.FORMATO]
+                # Validar que las columnas coincidan con el formato esperado
+                df.columns = df.columns.str.strip()  # Eliminar espacios en los nombres de las columnas
+                if not all(col in df.columns for col in ValidationMethods.FORMATO):
+                    raise ValueError("El archivo no tiene las columnas requeridas.")
 
-            # Ignorar la primera fila (cabeceras)
-            df = df.iloc[1:]
+                # Seleccionar solo las columnas definidas en el formato
+                df = df[ValidationMethods.FORMATO]
 
-            # Añadir al conjunto global
-            data_global.append(df)
+                # Agregar el DataFrame procesado a la lista
+                dataframes.append(df)
 
-            # Validación interna de duplicados
-            duplicados_internos = df[df["DOCUMENTO IDENTIFICACION"].duplicated(keep=False)]
-            registros_duplicados.append(duplicados_internos)
+            # Unificar todos los DataFrames en uno solo
+            df_unificado = pd.concat(dataframes, ignore_index=True)
 
-        # Validación externa (entre todos los archivos)
-        if len(data_global) > 1:
-            # Unificar todos los registros cargados
-            data_consolidada = pd.concat(data_global)
+            # Eliminar espacios en los valores de "DOCUMENTO IDENTIFICACION"
+            df_unificado["DOCUMENTO IDENTIFICACION"] = df_unificado["DOCUMENTO IDENTIFICACION"].astype(str).str.strip()
 
-            # Identificar cédulas duplicadas globalmente
-            cédulas_duplicadas_globales = data_consolidada["DOCUMENTO IDENTIFICACION"].duplicated(keep=False)
+            # Detectar duplicados por "DOCUMENTO IDENTIFICACION"
+            duplicados_cedulas = df_unificado[df_unificado["DOCUMENTO IDENTIFICACION"].duplicated(keep=False)]
+            no_duplicados = df_unificado.drop(duplicados_cedulas.index)
 
-            # Filtrar registros completos con duplicados
-            duplicados_externos = data_consolidada[cédulas_duplicadas_globales]
-            registros_duplicados.append(duplicados_externos)
+            # Guardar los registros duplicados en un archivo Excel
+            if not duplicados_cedulas.empty:
+                duplicados_cedulas.to_excel(archivo_duplicados, index=False, columns=ValidationMethods.FORMATO)
+            else:
+                archivo_duplicados = None  # No se crea archivo si no hay duplicados
 
-        # Consolidar los registros duplicados encontrados
-        if registros_duplicados:
-            # Combinar los registros duplicados en un único DataFrame
-            duplicados_df = pd.concat(registros_duplicados).drop_duplicates()
+            # Guardar los registros no duplicados en otro archivo Excel
+            if not no_duplicados.empty:
+                no_duplicados.to_excel(archivo_no_duplicados, index=False, columns=ValidationMethods.FORMATO)
+            else:
+                archivo_no_duplicados = None  # No se crea archivo si no hay registros únicos
 
-            # Si el archivo "HISTORICO_DUPLICADO" ya existe, añadir los duplicados al archivo existente
-            if os.path.exists(ruta_duplicados):
-                historico_existente = pd.read_excel(ruta_duplicados)
-                duplicados_df = pd.concat([historico_existente, duplicados_df]).drop_duplicates()
-
-            # Guardar el archivo actualizado
-            duplicados_df.to_excel(ruta_duplicados, index=False, header=True)
-
-            return {
+            # Construir la respuesta
+            resultados = {
                 "status": 200,
-                "message": "Validación completada. Se actualizó el archivo HISTORICO_DUPLICADO.",
-                "path": ruta_duplicados,
+                "mensaje": "Validación completada.",
+                "archivo_duplicados": archivo_duplicados if archivo_duplicados else "No se generó archivo de duplicados.",
+                "archivo_no_duplicados": archivo_no_duplicados if archivo_no_duplicados else "No se generó archivo de no duplicados."
             }
-        else:
+
+            return resultados
+
+        except Exception as e:
             return {
-                "status": 200,
-                "message": "No se encontraron cédulas duplicadas en los archivos procesados.",
+                "mesage": f"Error al procesar los archivos: {str(e)}",
+                "status": 500
             }
+

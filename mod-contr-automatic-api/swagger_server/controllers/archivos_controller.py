@@ -50,6 +50,15 @@ def get_archivos_carga(body = None):  # noqa: E501
             if validation_1 is True:
                 validation_2 = ValidationMethods.valid_ci(files)
                 # new_file = FilesMethods.fusion_files(files)
+                if validation_2["status"] == 200:  # Verifica si la validación fue exitosa
+                    validation_2['external_transaction_id'] = body.external_transaction_id
+                    validation_2['internal_transaction_id'] = internal.generate_internal_transaction_id()
+                    return jsonify(validation_2), 200
+                else:
+                    # Si hay un error, retorna el mensaje de error proporcionado
+                    validation_2['external_transaction_id'] = body.external_transaction_id
+                    validation_2['internal_transaction_id'] = internal.generate_internal_transaction_id()
+                    return jsonify(validation_2), validation_2["status"]
             else:
                 validation_1['external_transaction_id'] = body.external_transaction_id
                 validation_1['internal_transaction_id'] = internal.generate_internal_transaction_id()
