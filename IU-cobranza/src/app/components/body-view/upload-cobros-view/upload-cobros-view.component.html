@@ -1,0 +1,25 @@
+<div class="modal-overlay">
+    <div class="modal">
+        <p>Cobranza: Ventana de carga de archivo</p>
+        <form class="formulario" *ngIf="visual_update">
+            <div class="dropzone" (click)="fileInput.click()">
+                <span>ARRASTRE Y SUELTE EL ARCHIVO DE COBRANZA DE ESTE PERIODO</span>
+                <input 
+                #fileInput 
+                type="file" 
+                accept=".xls, .xlsx" 
+                style="display: none" 
+                multiple 
+                (change)="onFileSelect($event)" 
+                />
+            </div>
+        </form>
+        <div class="loading" *ngIf="visual_loading">
+            <img src="assets/loadings.gif" alt="Cargando..." />
+        </div>
+        <div class="visual_message_final" *ngIf="visual_message_final">
+            <p *ngIf="visual_status"> Los Datos han sido Actualizados Correctamente </p>
+            <p *ngIf="!visual_status"> Ocurrio un error en la Actualizacion</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+.view_cobranzas{
+    display: flex;
+    flex-direction: column;
+}
+
+body{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.proceso, .capanas, .carga, .cambio, .actualizar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}

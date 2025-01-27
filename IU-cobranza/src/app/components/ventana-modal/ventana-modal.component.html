@@ -1,0 +1,41 @@
+<div class="modal-overlay">
+  <div class="modal-content">
+    <button class="close-btn" *ngIf="visual_message" (click)="saltar()">×</button>
+    <div class="visual_message" *ngIf="visual_message">
+      <p>
+        La última actualización de la Base de Datos de Suplantación de Identidad fue actualizada en la fecha 
+        <span *ngIf="lastUpdateDate">{{ lastUpdateDate }}</span>
+        <span *ngIf="!lastUpdateDate">[ Cargando... ]</span>,
+        desea actualizar esta base de datos?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-skip" (click)="saltar()">SALTAR</button>
+        <button class="btn-update" (click)="actualizar()">ACTUALIZAR</button>
+      </div>
+    </div>
+    <div class="visual_update" *ngIf="visual_update">
+      <form class="formulario">
+        <div class="zona1">
+          <div class="dropzone" (click)="fileInput.click()">
+            <span>ARRASTRE Y SUELTE EL EXCEL DE ACTUALIZACION DE SUPLANTACION DE CLIENTES</span>
+            <input 
+              #fileInput 
+              type="file" 
+              accept=".xls, .xlsx" 
+              style="display: none" 
+              multiple 
+              (change)="onFileSelect($event)" 
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="loading" *ngIf="visual_loading">
+      <img src="assets/loadings.gif" alt="Cargando..." />
+    </div>
+    <div class="visual_message_final" *ngIf="visual_message_final">
+      <p *ngIf="visual_status"> Los Datos han sido Actualizados Correctamente </p>
+      <p *ngIf="!visual_status"> Ocurrio un error en la Actualizacion</p>
+    </div>
+  </div>
+</div>

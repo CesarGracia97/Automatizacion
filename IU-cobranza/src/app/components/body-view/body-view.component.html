@@ -1,0 +1,53 @@
+<div class="content_principal">
+    <div class="view_cobranzas">
+        <header>
+            <span>COBRANZA AUTOMATICA</span>
+        </header>
+        <body>
+            <div class="proceso">
+                <div class="header_proceso">
+                    <span>SECCION DE PROCESOS</span>
+                </div>
+                <div class="body_proceso">
+                    <button (click)="show_view('proceso')">CREAR PROCESO</button>
+                </div>
+            </div>
+            <div class="capanas">
+                <div class="header_campanas">
+                    <span>SECCION DE CAMPAÑAS</span>
+                </div>
+                <div class="body_capanas">
+                    <button (click)="show_view('campana')">CREAR CAMPAÑAS</button>
+                </div>
+            </div>
+            <div class="carga">
+                <div class="header_cargas">
+                    <span>CARGA DE ARCHIVOS BASE</span>
+                </div>
+                <div class="body_cargas">
+                    <button (click)="show_view('cobranza')">CARGAR ARCHIVO</button>
+                </div>
+            </div>
+            <div class="cambio">
+                <div class="header_cambio">
+                    <span>CAMBIO DE PROVEEDOR</span>
+                </div>
+                <div class="body_cambio">
+                    <button (click)="show_view('transaccion')">TRANSACCION</button>
+                </div>
+            </div>
+            <div class="actualizar">
+                <div class="header_actualizar">
+                    <span>AGG O CAMBIAR SUPLANTACION</span>
+                </div>
+                <div class="body_actualizar">
+                    <button (click)="show_view('addgg')">SUPLANTACION</button>
+                </div>
+            </div>
+        </body>
+    </div>
+</div>
+<app-upload-cobros-view *ngIf="cobros_view"/>
+<app-create-procesos-view *ngIf="proceso_view"/>
+<app-create-campanas-view *ngIf="campanas_view"/>
+<app-change-proveedor-view *ngIf="transacciones_view"/>

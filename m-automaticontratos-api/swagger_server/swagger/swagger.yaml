@@ -1,0 +1,349 @@
+openapi: 3.0.3
+info:
+  title: Modulo-Automatic-Contratos-api
+  description: swcecwes
+  version: 1.0.11
+servers:
+- url: /rest/m-automaticontratos-api/v1.0/
+tags:
+- name: Archivos
+  description: Endpoint de Archivos
+- name: Crear
+  description: Endpoint de creacion de Cmapañas y Procesos
+- name: Modificar
+  description: Endpoint de Transacciones
+- name: Lectura
+  description: Endpoint de Consulta
+paths:
+  /post/upload/archivos:
+    post:
+      tags:
+      - Archivos
+      description: Procesos de Carga de Archivos de Cobros
+      operationId: post_upload_archivoscobros
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RequestArchivos'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.archivos_controller
+  /put/upload/suplantacion:
+    post:
+      tags:
+      - Archivos
+      description: Procesos de Carga de Archivos de Suplantacion
+      operationId: post_upload_archivossuplantacion
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RequestArchivos'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.archivos_controller
+  /post/create/campanas:
+    post:
+      tags:
+      - Crear
+      description: Procesos de Creacion de Campañas
+      operationId: post_create_campanas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestCreateCampana'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.crear_controller
+  /post/create/procesos:
+    post:
+      tags:
+      - Crear
+      description: Procesos de Creacion de Proceso
+      operationId: post_create_procesos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestCreateProcess'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.crear_controller
+  /get/queries:
+    post:
+      tags:
+      - Lectura
+      description: Endpoint de Lectura de Datos
+      operationId: get_read
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLectura'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.lectura_controller
+  /patch/modify/transacciones:
+    patch:
+      tags:
+      - Modificar
+      description: Procesos de Modificaciones de Registro de Proveedores
+      operationId: patch_transaccion_proveedores
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RequestArchivos'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Archivos'
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EArchivos_400'
+      x-openapi-router-controller: swagger_server.controllers.modificar_controller
+components:
+  schemas:
+    RequestCreateProcess:
+      required:
+      - channel
+      - externalTransactionId
+      - proceso
+      type: object
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        proceso:
+          $ref: '#/components/schemas/RequestCreateProcess_proceso'
+    RequestCreateCampana:
+      required:
+      - campana
+      - channel
+      - externalTransactionId
+      - idproceso
+      type: object
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        campana:
+          $ref: '#/components/schemas/Campana'
+        idproceso:
+          type: integer
+    RequestLectura:
+      required:
+      - channel
+      - externalTransactionId
+      - peticion
+      type: object
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        peticion:
+          type: string
+          example: suplantacion
+    RequestArchivos:
+      required:
+      - archivo
+      - channel
+      - externalTransactionId
+      type: object
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        archivo:
+          type: array
+          description: Archivos en formato Excel o CSV
+          items:
+            type: string
+            format: binary
+    Response_Archivos:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+          enum:
+          - 200
+          - 400
+        mesage:
+          type: string
+          example: El archivo fue cargado satisfactoreamente u ocurrio un problema
+            dentro de su proceso
+        internalTransactionId:
+          type: string
+          example: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId:
+          type: string
+          example: 82fb166d-c273-4840-9008-c895cf9de255
+      description: Modelo de respuesta tanto Satisfactorio como Fallido
+      example:
+        mesage: El archivo fue cargado satisfactoreamente u ocurrio un problema dentro
+          de su proceso
+        internalTransactionId: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId: 82fb166d-c273-4840-9008-c895cf9de255
+        status: 400
+    Response_EVArchivos:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        elementos:
+          type: array
+          example:
+          - CUENTA TITAN
+          - Referencia interna
+          - DOCUMENTO IDENTIFICACION
+          items:
+            type: string
+        internalTransactionId:
+          type: string
+          example: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId:
+          type: string
+          example: 82fb166d-c273-4840-9008-c895cf9de255
+      description: Modelo de respuesta en caso que ocurra un fallo en la validacion
+        del archivo.
+    ResponseError:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: OK
+        internalTransactionId:
+          type: string
+          example: 03c33780-88cf-46cf-ba22-925e4d5be471
+        externalTransactionId:
+          type: string
+          example: 82fb166d-c273-4840-9008-c895cf9de255
+    EArchivos_400:
+      oneOf:
+      - $ref: '#/components/schemas/ResponseError'
+      - $ref: '#/components/schemas/Response_Archivos'
+      - $ref: '#/components/schemas/Response_EVArchivos'
+    RequestCreateProcess_proceso:
+      required:
+      - ffin
+      - finicio
+      - mes
+      - nombre
+      properties:
+        nombre:
+          type: string
+        finicio:
+          type: string
+          format: date
+          example: 2024-08-08
+        ffin:
+          type: string
+          format: date
+          example: 2024-08-08
+        mes:
+          type: integer
+    Campana:
+      required:
+      - descuento
+      - ffin
+      - finicio
+      - nombre
+      properties:
+        nombre:
+          type: string
+        descuento:
+          type: number
+          format: float
+        finicio:
+          type: string
+          format: date
+          example: 2024-08-08
+        ffin:
+          type: string
+          format: date
+          example: 2024-08-08
+
