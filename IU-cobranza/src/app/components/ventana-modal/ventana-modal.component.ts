@@ -33,6 +33,7 @@ export class VentanaModalComponent {
       next: (response) => {
         // Convertir la fecha al formato día-mes-año
         const date = new Date(response.fecha);
+        date.setDate(date.getDate() + 1); // Sumar 1 día
         this.lastUpdateDate = date.toLocaleDateString('es-ES', {
           day: '2-digit',
           month: '2-digit',
@@ -45,6 +46,7 @@ export class VentanaModalComponent {
       }
     });
   }
+  
   saltar() {
     this.comunication.principal_state_modal_visualization(false);
   }

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import calendar
 from swagger_server.utils.resource.mysql_configuration import MySQL_Configuration
+from swagger_server.utils.tools.tools import Tools
 
 class DB_Queries_Methods:
     @staticmethod
@@ -70,53 +71,46 @@ class DB_Queries_Methods:
     def query_meses_disponible():
         db_config = MySQL_Configuration()
         db_config.connect()
+        tools = Tools()
         try:
-            # Obtener el mes actual y el siguiente
             now = datetime.now()
             current_month = now.month
             current_year = now.year
-            # Generar una lista de meses disponibles inicial
+
             available_months = [
-                f"{calendar.month_name[current_month]} {current_year}",
-                f"{calendar.month_name[(current_month % 12) + 1]} {current_year if current_month < 12 else current_year + 1}",
+                {"mes": current_month, "ano": current_year},
+                {"mes": (current_month % 12) + 1, "ano": current_year if current_month < 12 else current_year + 1},
             ]
+
             # Consulta para obtener el último registro
             query = """SELECT FECHAFIN FROM YTBL_COBRANZAS_PROCESO WHERE FECHAFIN IS NOT NULL ORDER BY ID DESC LIMIT 1"""
             result = db_config.fetch_results(query)
-            # Si no hay resultados, devolver la lista inicial
             if not result:
                 return {
                     "status": 200,
-                    "meses": available_months
+                    "meses": tools.mounthsTranslateGenerator(available_months)
                 }
-            # Si hay un resultado
-            last_fecha_fin = result[0][0]  # FECHAFIN del último registro
+            last_fecha_fin = result[0][0]
             last_fecha_fin = datetime.strptime(last_fecha_fin, "%Y-%m-%d")
-
-            # Determinar el mes del último registro
             last_month = last_fecha_fin.month
             last_year = last_fecha_fin.year
-            # Verificar si el último mes bloquea algún mes disponible
             available_months = [
                 month
                 for month in available_months
                 if not (
-                        (current_year == last_year and current_month == last_month)
-                        or ((current_month % 12) + 1 == last_month and last_year == current_year)
+                    (month["ano"] == last_year and month["mes"] == last_month)
                 )
             ]
-            # Retornar resultado
             if available_months:
                 return {
                     "status": 200,
-                    "meses": available_months
+                    "meses": tools.mounthsTranslateGenerator(available_months)
                 }
             else:
                 return {
                     "status": 204,
-                    "meses": ["NO HAY MESES DISPONIBLES"]
+                    "meses": []
                 }
-
         except Exception as e:
             print(f"Error al consultar los meses disponibles: {e}")
             return {
@@ -131,14 +125,14 @@ class DB_Queries_Methods:
         db_config = MySQL_Configuration()
         response = {}
         try:
-            query = """SELECT IDPROCESO, NOMBRE FROM YTBL_COBRANZAS_PROCESO_COBRO  WHERE ISVALID = 'Y'"""
+            query = """SELECT IDPROCESO, NOMBRE, FINICIO, FFIN FROM YTBL_COBRANZAS_PROCESO  WHERE ISVALID = 'Y'"""
 
             db_config.connect()
 
             results = db_config.fetch_results(query)
             if results:
                 # Convertir los resultados en una lista de diccionarios
-                response["procesos"] = [{"IDPROCESO": row[0], "NOMBRE": row[1]} for row in results]
+                response["procesos"] = [{"IDPROCESO": row[0], "NOMBRE": row[1], "FINICIO": row[2], "FFIN": row[3]} for row in results]
                 response["status"] = 200
             else:
                 response["status"] = 404

@@ -3,6 +3,7 @@ from datetime import datetime
 import calendar
 from swagger_server.utils.resource.mysql_configuration import MySQL_Configuration
 from swagger_server.uses_cases.db_queries_methods import DB_Queries_Methods
+from swagger_server.utils.tools.tools import Tools
 
 
 class DB_Insert_Methods:
@@ -230,40 +231,24 @@ class DB_Insert_Methods:
     def insert_data_proceso_create(data):
         """
         Inserta datos en la tabla YTBL_COBRANZAS_PROCESO_COBRO:param datos: Un diccionario que contiene los siguientes campos:
-                      - nombre: str, nombre del proceso.
-                      - finicio: datetime, fecha inicial del proceso.
-                      - ffin: datetime (opcional), fecha final del proceso.
-                      - mes: int, número del mes del proceso (1 = enero, 12 = diciembre).
         """
         # Validar que el objeto datos tenga los campos requeridos
         response = {}
-        if not all(key in data for key in ['nombre', 'finicio', 'mes']):
-            raise ValueError("Faltan campos requeridos en el objeto 'datos'.")
+        nombre = data.nombre
+        fcreacion = datetime.now().date()  # Fecha de creación actua
+        mes = data.mes  # Mes como número entero (1-12)l
+        tools = Tools()
+        fechafin = tools.obtener_ultimo_dia_mes(data.finicio)
+        finicio = data.finicio
+        ffin = data.ffin
 
-        nombre = data['nombre']
-        finicio = data['finicio']
-        mes = data['mes']  # Mes como número entero (1-12)
-        fcreacion = datetime.now().date()  # Fecha de creación actual
-
-        # Validar que el mes sea un número válido
-        if not (1 <= mes <= 12):
-            raise ValueError(f"El valor de 'mes' ({mes}) no es válido. Debe estar entre 1 y 12.")
-
-        # Calcular la fecha final del mes (FFIN)
-        if 'ffin' in data and data['ffin'] is not None:
-            ffin = data['ffin']
-        else:
-            # Calcular el último día del mes
-            year = finicio.year
-            _, last_day = calendar.monthrange(year, mes)
-            ffin = datetime(year, mes, last_day).date()
 
         # Conectar a la base de datos y ejecutar el query
         query = """
-            INSERT INTO YTBL_COBRANZAS_PROCESO (NOMBRE, FCREACION, FINICIO, FFIN, ISVALID)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO YTBL_COBRANZAS_PROCESO (NOMBRE, FCREACION, FINICIO, FFIN, FECHAFIN, ISVALID)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
-        params = (nombre, fcreacion, finicio, ffin, 'Y')
+        params = (nombre, fcreacion, finicio, ffin, fechafin, 'Y')
 
         db_config = MySQL_Configuration()
         try:

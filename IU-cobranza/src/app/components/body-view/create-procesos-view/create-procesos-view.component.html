@@ -8,29 +8,35 @@
             <div class="body_header">
                 <div class="content_select">
                     <span>MES DEL PROCESO</span>
-                    <select name="" id="">
+                    <select name="" id="" [(ngModel)]="mesSel" (change)="setLimits()" >
                         <option value="">SELECCIONE UN MES DISPONIBLE</option>
+                        <option *ngFor="let mes of meses" [value]="mes.mes + '-' + mes.ano"> {{ mes.nombre }} </option>
                     </select>
                 </div>
                 <div class="content_name">
                     <span>Nombre de la Campaña</span>
-                    <input type="text" placeholder="INGRESE UN NOMBRE" />
+                    <input type="text" placeholder="INGRESE UN NOMBRE" [(ngModel)]="name"/>
                 </div>
                 <div class="content_calendar_1">
                     <span>Fecha de Inicio de la Campaña</span>
-                    <input type="date" />
+                    <input type="date" [min]="minDate" [max]="maxDate" [(ngModel)]="finicio"/>
                 </div>
                 <div class="content_calendar_2">
                     <span>Fecha de Finalizacion de Campaña</span>
-                    <input type="date" />
+                    <input type="date" [min]="minDate" [max]="maxDate" [(ngModel)]="ffin"/>
                 </div>
             </div>
             <div class="body_button">
-                <button>Crear</button>
+                <button (click)="createProceso()">Crear</button>
             </div>
         </div>
         <div class="footer_modal">
-
+            <div class="loading" *ngIf="state_loading">
+                <img src="assets/loadings.gif" alt="Cargando..." />
+            </div>
+            <div class="message" *ngIf="state_response">
+                <span>{{ message_text }}</span>
+            </div>
         </div>
     </div>
 </div>

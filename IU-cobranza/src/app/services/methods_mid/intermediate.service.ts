@@ -5,13 +5,18 @@ import { Observable } from 'rxjs/internal/Observable';
 import { FetchDataService } from '../request/fetch-data.service';
 import { Update_File } from '../../interfaces/request/request_send.interface';
 import { SendDataService } from '../request/sendata.service';
+import { DataStorageService } from '../data_storage/data-storage.service';
+import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IntermediateService {
 
-  constructor(private upload: uploadFileService, private fetchdata: FetchDataService, private sendData: SendDataService) { }
+  constructor(
+    private upload: uploadFileService, private fetchdata: FetchDataService, private ds: DataStorageService,
+    private sendData: SendDataService, 
+  ) { }
 
   mid_updloadExclutionFile(file: File): Observable<Update_File> {
     return this.upload.uploadExclution(file);
@@ -25,8 +30,13 @@ export class IntermediateService {
     return this.fetchdata.query_LastUpdateSuplantacion();
   }
 
-  mid_fetchdataAvailableMonths(): Observable<S_AvailableMonths>{
-    return this.fetchdata.query_AvailableMonths();
+  mid_fetchdataAvailableMonths(): Observable<S_AvailableMonths> {
+    return this.fetchdata.query_AvailableMonths().pipe(
+      tap((response) => {
+        // Guardar los datos en el DataStorageService
+        this.ds.setAvailableMonths(response);
+      })
+    );
   }
 
   mid_sendDataProcess(data: { [key: string]: any }): Observable<S_Charge>{
