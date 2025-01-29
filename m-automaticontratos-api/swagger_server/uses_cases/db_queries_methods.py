@@ -68,6 +68,56 @@ class DB_Queries_Methods:
             db_config.disconnect()
 
     @staticmethod
+    def query_meses_disponibl2():
+        # Conectar a la base de datos
+        db_config = MySQL_Configuration()
+        db_config.connect()
+
+        # Obtener la fecha actual
+        today = datetime.today()
+        year = today.year
+        month = today.month
+
+        # Calcular meses disponibles (mes actual y siguiente)
+        meses_disponibles = {
+            (year, month),
+            (year + (month // 12), (month % 12) + 1)
+        }
+
+        # Consultar la base de datos para obtener los registros existentes
+        query = """
+                    SELECT FIPROCESO, FFPROCESO, ISVALID FROM YTBL_COBRANZAS_PROCESO
+                """
+        registros = db_config.fetch_results(query)
+
+        # Si no hay registros en la base de datos, devolver meses disponibles
+        if not registros:
+            return {
+                "status": 200,
+                "meses": [f"{calendar.month_name[m]} {y}" for y, m in meses_disponibles]
+            }
+
+        # Filtrar meses que ya existen en la BD con ISVALID='V'
+        meses_ocupados = set()
+        for finicio, fechafin, isvalid in registros:
+            if isvalid == 'V':
+                fecha_inicio = finicio.replace(day=1)
+                year_db, month_db = fecha_inicio.year, fecha_inicio.month
+                meses_ocupados.add((year_db, month_db))
+
+        # Determinar los meses aún disponibles
+        meses_finales = meses_disponibles - meses_ocupados
+
+        # Cerrar la conexión
+        db_config.disconnect()
+
+        # Retornar la lista de meses disponibles
+        return {
+            "status": 200,
+            "meses": [f"{calendar.month_name[m]} {y}" for y, m in meses_finales]
+        }
+
+    @staticmethod
     def query_meses_disponible():
         db_config = MySQL_Configuration()
         db_config.connect()
@@ -83,7 +133,7 @@ class DB_Queries_Methods:
             ]
 
             # Consulta para obtener el último registro
-            query = """SELECT FECHAFIN FROM YTBL_COBRANZAS_PROCESO WHERE FECHAFIN IS NOT NULL ORDER BY ID DESC LIMIT 1"""
+            query = """SELECT FFPROCESO FROM YTBL_COBRANZAS_PROCESO WHERE FFPROCESO IS NOT NULL ORDER BY ID DESC LIMIT 1"""
             result = db_config.fetch_results(query)
             if not result:
                 return {

@@ -32,15 +32,3 @@ class Tools:
         ]
 
         return translated_months
-
-    @staticmethod
-    def obtener_ultimo_dia_mes(fecha: datetime) -> str:
-        # Obtenemos el año y el mes de la fecha proporcionada
-        ano = fecha.year
-        mes = fecha.month
-
-        # Usamos calendar.monthrange para obtener el último día del mes
-        _, ultimo_dia = calendar.monthrange(ano, mes)
-
-        # Devolvemos la fecha en formato 'YYYY-MM-DD'
-        return f"{ano}-{mes:02d}-{ultimo_dia:02d}"

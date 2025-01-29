@@ -236,19 +236,15 @@ class DB_Insert_Methods:
         response = {}
         nombre = data.nombre
         fcreacion = datetime.now().date()  # Fecha de creación actua
-        mes = data.mes  # Mes como número entero (1-12)l
-        tools = Tools()
-        fechafin = tools.obtener_ultimo_dia_mes(data.finicio)
         finicio = data.finicio
         ffin = data.ffin
 
-
         # Conectar a la base de datos y ejecutar el query
         query = """
-            INSERT INTO YTBL_COBRANZAS_PROCESO (NOMBRE, FCREACION, FINICIO, FFIN, FECHAFIN, ISVALID)
+            INSERT INTO YTBL_COBRANZAS_PROCESO (NOMBRE, FCREACION, FIPROCESO, FFPROCESO, ISVALID)
             VALUES (%s, %s, %s, %s, %s, %s)
         """
-        params = (nombre, fcreacion, finicio, ffin, fechafin, 'Y')
+        params = (nombre, fcreacion, finicio, ffin, 'Y')
 
         db_config = MySQL_Configuration()
         try:
