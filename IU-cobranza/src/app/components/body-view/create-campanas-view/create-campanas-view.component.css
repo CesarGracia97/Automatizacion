@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 /* Overlay que bloquea el resto de la pantalla */
 .modal-overlay {
   position: fixed;
@@ -10,6 +11,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Estilo del modal */
@@ -19,11 +21,52 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   text-align: center;
-  width: 600px;
+  width: 1100px;
   max-width: 150%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Botón de cerrar */
+.modal_header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.modal_body{
+  display: flex;
+  flex-direction: column;
+}
+
+.body_superior{
+  display: flex;
+  flex-direction: row;
+}
+
+.sel_idprocess, .inp_name, .inp_ffinp, .inp_finip, .inp_descu{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20%;
+  height: 50px;
+  gap: 10px;
+  padding: 5px;
+  font-size: 10pt;
+
+  input{
+    width: 100%;
+    font-size: 9pt;
+    height: 30px;
+  }
+
+  select{
+    width: 100%;
+    height: 30px;
+    font-size: 7pt;
+  }
+}
+
+
 button {
   margin-top: 20px;
   padding: 10px 15px;
@@ -36,4 +79,19 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+.close{
+  cursor: pointer;
+  width: 40px;
+}
+
+img{
+  width: 40px;
+  height: 40px;
+}
+
+.loading{
+  align-items: center;
+  text-align: center;
 }

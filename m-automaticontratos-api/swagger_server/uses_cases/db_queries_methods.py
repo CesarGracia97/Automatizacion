@@ -175,14 +175,14 @@ class DB_Queries_Methods:
         db_config = MySQL_Configuration()
         response = {}
         try:
-            query = """SELECT IDPROCESO, NOMBRE, FINICIO, FFIN FROM YTBL_COBRANZAS_PROCESO  WHERE ISVALID = 'Y'"""
+            query = """SELECT IDPROCESO, NOMBRE, FIPROCESO, FFPROCESO FROM YTBL_COBRANZAS_PROCESO  WHERE ISVALID = 'Y'"""
 
             db_config.connect()
-
+            db_config.disconnect()
             results = db_config.fetch_results(query)
             if results:
                 # Convertir los resultados en una lista de diccionarios
-                response["procesos"] = [{"IDPROCESO": row[0], "NOMBRE": row[1], "FINICIO": row[2], "FFIN": row[3]} for row in results]
+                response["procesos"] = [{"idproceso": row[0], "name": row[1], "fiproceso": row[2], "ffproceso": row[3]} for row in results]
                 response["status"] = 200
             else:
                 response["status"] = 404
@@ -191,25 +191,18 @@ class DB_Queries_Methods:
             response["message"]= f"Error al ejecutar la consulta: {e}"
             response["status"]= 500
         finally:
-            db_config.disconnect()
             return response
 
     @staticmethod
-    def query_idcampana(campana, fcreacion, fechafin)-> int :
+    def query_idcampana(campana, fcreacion)-> int :
         """ Obtiene el IDCAMPANIA recién generado a partir de los datos proporcionados de la campaña."""
         db_config = MySQL_Configuration()
         try:
-            # Extraer valores de la campaña
-            nombre = campana['nombre']
-            descuento = campana['descuento']
-            finicio = campana['finicio']
-            ffin = campana['ffin']
-
             # Query para obtener el IDCAMPANIA
-            query = """SELECT ID FROM YTBL_COBRANZAS_CAMPANIA
-                WHERE NOMBRE = %s AND PORC_DESCUENTO = %s AND FCREACION = %s AND FFIN = %s AND FINICIO = %s 
-                AND FECHAFIN = %s AND ISVALID = 'V' ORDER BY ID DESC LIMIT 1"""
-            params = (nombre, descuento, fcreacion, ffin, finicio, fechafin)
+            query = """SELECT IDCAMPANA FROM YTBL_COBRANZAS_CAMPANA
+                WHERE NOMBRE = %s AND PORC_DESCUENTO = %s AND FCREACION = %s AND FICAMPANA = %s AND FFCAMPANA = %s 
+                AND ISVALID = 'V' ORDER BY ID DESC LIMIT 1"""
+            params = (campana.nombre, campana.descuento, fcreacion, campana.finicio, campana.ffin)
             db_config.connect()
             result = db_config.fetch_results(query, params)
             db_config.disconnect()
@@ -218,3 +211,26 @@ class DB_Queries_Methods:
             return None  # Si no hay resultados, retornar None
         except Exception as e:
             raise Exception(f"Error al consultar IDCAMPANIA: {e}")
+
+    @staticmethod
+    def query_clientessuspendidos():
+        """"""
+        db_config = MySQL_Configuration()
+        response = {}
+        try:
+            query = """SELECT CLIENTE, CONTRATO, CUENTA, DETALLE, FECHA_EXCLUSION, ISVALID FROM YTBl_COBRANZAS_EXCLUSION_CLIENTES
+                    WHERE ISVALID = 'Y'"""
+            db_config.connect()
+            results = db_config.fetch_results(query)
+            db_config.disconnect()
+            if results:
+                response["suspendidos"] = [{"cliente": row[0], "contrato": row[1], "detalle": row[2],
+                                            "fecha_exclusion": row[3], "isvalid": row[4] } for row in results]
+                response["status"] = 200
+        except Exception as e:
+            response["message"]= f"Error al ejecutar la consulta: {e}"
+            response["status"]= 500
+        finally:
+            return response
+
+

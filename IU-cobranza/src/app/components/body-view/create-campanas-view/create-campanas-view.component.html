@@ -1,6 +1,44 @@
 <div class="modal-overlay">
     <div class="modal">
-        <p>Ventana de Campañas</p>
-        <button>Cerrar</button>
+        <div class="modal_header">
+            <p>Ventana de Campañas</p>
+            <p (click)="closeModal()" class="close">x</p>
+        </div>
+        <div class="modal_body">
+            <div class="body_superior">
+                <div class="sel_idprocess">
+                    <span>PROCESO</span>
+                    <select [(ngModel)]="procsele" (change)="setLimitsDate()">
+                        <option [ngValue]="null">SELECCIONE UN PROCESO HABILITADO</option>
+                        <option *ngFor="let proceso of procesos" [ngValue]="proceso">{{ proceso.name }}</option>
+                    </select>
+                </div>
+                <div class="inp_name">
+                    <span>CAMPAÑA</span>
+                    <input type="text" [(ngModel)]="name" placeholder="INGRESE EL NOMBRE DE LA CAMPAÑA" />
+                </div>
+                <div class="inp_finip">
+                    <span>INICIO DE CAMPAÑA</span>
+                    <input type="date" [(ngModel)]="finic" [min]="minDate" [max]="maxDate" (change)="setLimitsDateFin()" /> 
+                </div>
+                <div class="inp_ffinp">
+                    <span>FINALIZACION DE CAMPAÑA</span>
+                    <input type="date" [(ngModel)]="ffinc" [min]="minFinDate" [max]="maxDate" />
+                </div>
+                <div class="inp_descu">
+                    <span>DESCUENTO DE ESTA CAMPAÑA</span>
+                    <input type="number" [(ngModel)]="descu" [min]="0" step="0.01" [max]="100.00" placeholder="INGRESE DESCUENTO" />
+                </div>
+            </div>
+            <div class="loading" *ngIf="state_loading">
+                <img src="assets/loadings.gif" alt="Cargando..."  />
+            </div>
+            <div class="response" *ngIf="state_response">
+                <span>{{message}}</span>
+            </div>
+            <div class="body_buttons">
+                <button (click)="createCampana()">CREAR</button>
+            </div>
+        </div>
     </div>
 </div>

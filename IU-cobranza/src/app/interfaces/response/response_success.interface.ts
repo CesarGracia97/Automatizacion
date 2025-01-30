@@ -26,10 +26,24 @@ export interface S_Charge{
 export interface S_AvailableProcess{
     status: number,
     procesos: {
-        IDPROCESO: number, 
-        NOMBRE: string,
-        FINICIO: Date,
-        FFIN: Date
+        idproceso: number, 
+        name: string,
+        fiproceso: Date,
+        ffproceso: Date
+    }[];
+    externalTransactionId: string,
+    internalTransactionId: string
+}
+
+export interface S_ClientesSuspendidos{
+    status: number,
+    suspendidos: {
+        cliente: string,
+        contrato: number,
+        cuenta: number,
+        detalle: string,
+        fecha_exclusion: string,
+        isvalid: string
     }[];
     externalTransactionId: string,
     internalTransactionId: string

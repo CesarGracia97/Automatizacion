@@ -42,6 +42,12 @@ def get_read(body=None):  # noqa: E501
                     procesos['externalTransactionId'] = body.external_transaction_id
                     procesos['internalTransactionId'] = internal_transaction_id
                     return jsonify(procesos), procesos["status"]
+                elif body.peticion == 'clientes-suspendidos':
+                    db = DB_Queries_Methods()
+                    suspendidos = db.query_clientessuspendidos()
+                    suspendidos['externalTransactionId'] = body.external_transaction_id
+                    suspendidos['internalTransactionId'] = internal_transaction_id
+                    return jsonify(suspendidos), suspendidos["status"]
                 else:
                     response = ResponseError(
                         error_code=-2,

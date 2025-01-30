@@ -29,10 +29,10 @@ export class CreateProcesosViewComponent {
 
   ngOnInit(): void {
     this.getDataMeses();
-    this.ds.dMesesHabilitados_Subject$.subscribe(data => { if (data)this.meses = data.meses; });
+    this.ds.dMesesHabilitados$.subscribe(data => { if (data)this.meses = data.meses; });
   }
 
-  getDataMeses(): void {
+  private getDataMeses(): void {
     this.mid.mid_fetchdataAvailableMonths().subscribe();
   }
 

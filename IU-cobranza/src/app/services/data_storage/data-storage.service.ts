@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { S_AvailableMonths } from '../../interfaces/response/response_success.interface';
+import { S_AvailableMonths, S_AvailableProcess } from '../../interfaces/response/response_success.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,11 @@ export class DataStorageService {
 
   // BehaviorSubject inicializado con un valor vacío
   private dMesesHabilitados_Subject = new BehaviorSubject<S_AvailableMonths | null>(null);
-  dMesesHabilitados_Subject$ = this.dMesesHabilitados_Subject.asObservable();
+  dMesesHabilitados$ = this.dMesesHabilitados_Subject.asObservable();
+
+  private dProcesoshabilitados_Subject = new BehaviorSubject<S_AvailableProcess | null>(null)
+  dProcesoshabilitados$ = this.dProcesoshabilitados_Subject.asObservable();
+  
 
   constructor() {}
 
@@ -21,5 +25,13 @@ export class DataStorageService {
   // Método para obtener el valor actual almacenado
   getAvailableMonths(): S_AvailableMonths | null {
     return this.dMesesHabilitados_Subject.getValue();
+  }
+
+  setAvailableProcesos(data: S_AvailableProcess): void {
+    this.dProcesoshabilitados_Subject.next(data)
+  }
+
+  getAvailableProcesos(): S_AvailableProcess | null {
+    return this.dProcesoshabilitados_Subject.getValue()
   }
 }

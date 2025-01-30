@@ -242,7 +242,7 @@ class DB_Insert_Methods:
         # Conectar a la base de datos y ejecutar el query
         query = """
             INSERT INTO YTBL_COBRANZAS_PROCESO (NOMBRE, FCREACION, FIPROCESO, FFPROCESO, ISVALID)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
         """
         params = (nombre, fcreacion, finicio, ffin, 'Y')
 
@@ -266,25 +266,22 @@ class DB_Insert_Methods:
         response = {"status": None, "message": ""}
         db_config = MySQL_Configuration()
         try:
-            ffin = campana['ffin']
             # Calcular fecha de creación y último día del mes de `ffin`
             fcreacion = datetime.now().date()
-            _, last_day = calendar.monthrange(ffin.year, ffin.month)
-            ffin_end_of_month = datetime(ffin.year, ffin.month, last_day).date()
-            query = """INSERT INTO YTBL_COBRANZAS_CAMPANIA (NOMBRE, PORC_DESCUENTO, FCREACION, FFIN, FINICIO, FECHAFIN, ISVALID)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-            params = (campana['nombre'], campana['descuento'], fcreacion, ffin_end_of_month, campana['finicio'], ffin, 'V')
+            query = """INSERT INTO YTBL_COBRANZAS_CAMPANA (NOMBRE, PORC_DESCUENTO, FCREACION, FICAMPANA, FFCAMPANA, ISVALID)
+                VALUES (%s, %s, %s, %s, %s, %s)"""
+            params = (campana.nombre, campana.descuento, fcreacion, campana.finicio, campana.ffin, 'V')
             db_config.connect()
             db_config.execute_query(query, params)
             db_config.disconnect()
             # Proceso para obtener el IDCAMPANIA recién insertado
-            id_campana = DB_Queries_Methods.query_idcampana(campana, fcreacion, ffin_end_of_month)
+            id_campana = DB_Queries_Methods.query_idcampana(campana, fcreacion)
 
             if not id_campana:
                 raise Exception("No se pudo obtener el ID de la campaña recién insertada.")
 
             # Proceso para registrar la relación entre proceso y campaña
-            DB_Insert_Methods.insert_data_relation_proceso_campana( idProceso, id_campana, campana, fcreacion, ffin_end_of_month)
+            DB_Insert_Methods.insert_data_relation_proceso_campana( idProceso, id_campana, campana, fcreacion)
 
             response["status"] = 200
             response["message"] = "Datos insertados correctamente en la tabla YTBL_COBRANZAS_CAMPANIA."
@@ -295,12 +292,12 @@ class DB_Insert_Methods:
             return response
 
     @staticmethod
-    def insert_data_relation_proceso_campana(idProceso, idCampana, campana, fcreacion,ffin_end_of_month):
+    def insert_data_relation_proceso_campana(idProceso, idCampana, campana, fcreacion):
         try:
             db_config = MySQL_Configuration()
-            query = """ INSERT INTO YTBL_COBRANZAS_PROCESO_CAMPANIA(IDPROCESO, IDCAMPANIA, FCREACION, FFIN, FINICIO, FECHAFIN, ISVALID)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-            params = (idProceso, idCampana,fcreacion, ffin_end_of_month, campana['finicio'], campana['ffin'], 'V')
+            query = """ INSERT INTO YTBL_COBRANZAS_PROCESO_CAMPANA(IDPROCESO, IDCAMPANA, FCREACION, FINICIO, FECHAFIN, ISVALID)
+            VALUES (%s, %s, %s, %s, %s, %s)"""
+            params = (idProceso, idCampana, fcreacion, campana.finicio, campana.ffin, 'V')
             db_config.connect()
             db_config.execute_query(query, params)
             db_config.disconnect()

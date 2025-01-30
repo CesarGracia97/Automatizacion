@@ -36,7 +36,7 @@ export class FetchDataService {
     const body = {
       'channel': 'automatic-contrato-web',
       'externalTransactionId': this.uuidService.generateUUID(),
-      'peticion': "proceso"
+      'peticion': "procesos"
     };
     return this.http.post<S_AvailableProcess>('http://127.0.0.1:2014/rest/m-automaticontratos-api/v1.0/get/queries', body, { headers });
   }

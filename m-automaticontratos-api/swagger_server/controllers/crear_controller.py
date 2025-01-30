@@ -21,6 +21,9 @@ def post_create_campanas(body=None):  # noqa: E501
             if body.channel == 'automatic-contrato-web':
                 db = DB_Insert_Methods()
                 campana = db.insert_data_campana_create(body.campana, body.idproceso)
+                campana['externalTransactionId'] = body.external_transaction_id
+                campana['internalTransactionId'] = internal_transaction_id
+                return jsonify(campana), campana["status"]
             else:
                 response = ResponseError(
                     error_code=-1,
@@ -51,7 +54,7 @@ def post_create_procesos(body=None):  # noqa: E501
         try:
             if body.channel == 'automatic-contrato-web':
                 db = DB_Insert_Methods
-                responses =db.insert_data_proceso_create(body.proceso)
+                responses = db.insert_data_proceso_create(body.proceso)
                 responses['externalTransactionId'] = body.external_transaction_id
                 responses['internalTransactionId'] = internal_transaction_id
                 return jsonify(responses), responses["status"]
