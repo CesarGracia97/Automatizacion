@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { S_AvailableMonths, S_AvailableProcess } from '../../interfaces/response/response_success.interface';
+import { S_AvailableMonths, S_AvailableProcess, S_ClientesSuspendidos } from '../../interfaces/response/response_success.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataStorageService {
-
-  // BehaviorSubject inicializado con un valor vacío
   private dMesesHabilitados_Subject = new BehaviorSubject<S_AvailableMonths | null>(null);
   dMesesHabilitados$ = this.dMesesHabilitados_Subject.asObservable();
 
   private dProcesoshabilitados_Subject = new BehaviorSubject<S_AvailableProcess | null>(null)
   dProcesoshabilitados$ = this.dProcesoshabilitados_Subject.asObservable();
-  
+
+  private dClientesSuspendidos_Subject = new BehaviorSubject<S_ClientesSuspendidos | null>(null);
+  dClientesSuspendidos = this.dClientesSuspendidos_Subject.asObservable();
 
   constructor() {}
 
