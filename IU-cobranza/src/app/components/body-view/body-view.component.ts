@@ -5,11 +5,12 @@ import { CreateProcesosViewComponent } from "./create-procesos-view/create-proce
 import { UploadCobrosViewComponent } from "./upload-cobros-view/upload-cobros-view.component";
 import { CommunicationService } from '../../services/views/communication.service';
 import { CommonModule } from '@angular/common';
+import { AddChangeSuplantacionComponent } from "./add-change-suplantacion/add-change-suplantacion.component";
 
 @Component({
   selector: 'app-body-view',
   standalone: true,
-  imports: [CommonModule, ChangeProveedorViewComponent, CreateCampanasViewComponent, CreateProcesosViewComponent, UploadCobrosViewComponent],
+  imports: [CommonModule, ChangeProveedorViewComponent, CreateCampanasViewComponent, CreateProcesosViewComponent, UploadCobrosViewComponent, AddChangeSuplantacionComponent],
   templateUrl: './body-view.component.html',
   styleUrl: './body-view.component.css'
 })

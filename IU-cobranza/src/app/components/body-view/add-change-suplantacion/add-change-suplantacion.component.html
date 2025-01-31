@@ -1,1 +1,51 @@
-<p>add-change-suplantacion works!</p>
+<div class="modal-overlay">
+    <div class="modal">
+        <div class="modal_header">
+            <p>CLIENTES SUSPENDIDOS</p>
+            <p class="close" (click)="closeModal()">x</p>
+        </div>
+        <div class="modal_body">
+            <div class="body_header">
+                <button class="btn_content_agg" (click)="mostrarSectorBody('AGG')">AGG. Clientes Suspendidos</button>
+                <button class="btn_content_mod" (click)="mostrarSectorBody('MOD')">MOD. Clientes Suspendidos</button>
+            </div>
+            <div class="body_agg" *ngIf="agg">
+                <div class="main_agg">
+                    <div class="main1">
+                        <span>CLIENTE</span>
+                        <input type="text" placeholder="Ingrese el Nombre del Cliente" [(ngModel)]="agg_cliente" />
+                    </div>
+                    <div class="main2">
+                        <div class="main2_contrato">
+                            <span>CONTRATO</span>
+                            <input type="number" placeholder="Ingrese el Numero del CONTRATO" [(ngModel)]="agg_contrato" />
+                        </div>
+                        <div class="main2_cuenta">
+                            <span>CUENTA</span>
+                            <input type="number" placeholder="Ingrese el Numero de la CUENTA" [(ngModel)]="agg_cuenta"/>
+                        </div>
+                    </div>
+                    <div class="main3">
+                        <span>FECHA DE EXCLUSION</span>
+                        <input type="text" placeholder=""[(ngModel)]="agg_fexclusion" />
+                    </div>
+                    <div class="main4">
+                        <span>DETALLES</span>
+                        <input type="text"[(ngModel)]="agg_detalle"/>
+                    </div>
+                </div>
+                <div class="button_agg">
+                    <button class="btn_agg" (click)="sendDataCreateNewSuspendido()">AGG. Cliente Suspendido</button>
+                </div>
+            </div>
+            <div class="body_mod" *ngIf="mod">
+                <div class="main_mod">
+
+                </div>
+                <div class="button_mod">
+                    <button class="btn_mod">Modificar Cliente Suspendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
