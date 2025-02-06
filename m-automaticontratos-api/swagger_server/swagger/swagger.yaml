@@ -25,20 +25,20 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/RequestArchivos'
+              $ref: "#/components/schemas/RequestArchivos"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response_Archivos'
+                $ref: "#/components/schemas/Response_Archivos"
         "400":
           description: Error operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EArchivos_400'
+                $ref: "#/components/schemas/EArchivos_400"
       x-openapi-router-controller: swagger_server.controllers.archivos_controller
   /put/upload/suplantacion:
     post:
@@ -50,20 +50,20 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/RequestArchivos'
+              $ref: "#/components/schemas/RequestArchivos"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response_Archivos'
+                $ref: "#/components/schemas/Response_Archivos"
         "400":
           description: Error operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EArchivos_400'
+                $ref: "#/components/schemas/EArchivos_400"
       x-openapi-router-controller: swagger_server.controllers.archivos_controller
   /post/create/campanas:
     post:
@@ -75,20 +75,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestCreateCampana'
+              $ref: "#/components/schemas/RequestCreateCampana"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response_Archivos'
+                $ref: "#/components/schemas/Response_Archivos"
         "400":
           description: Error operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EArchivos_400'
+                $ref: "#/components/schemas/EArchivos_400"
       x-openapi-router-controller: swagger_server.controllers.crear_controller
   /post/create/procesos:
     post:
@@ -100,20 +100,45 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestCreateProcess'
+              $ref: "#/components/schemas/RequestCreateProcess"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response_Archivos'
+                $ref: "#/components/schemas/Response_Archivos"
         "400":
           description: Error operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EArchivos_400'
+                $ref: "#/components/schemas/EArchivos_400"
+      x-openapi-router-controller: swagger_server.controllers.crear_controller
+  /post/create/suspendidos:
+    post:
+      tags:
+      - Crear
+      description: Procesos de creacion de nuevos clientes suspendidos
+      operationId: post_create_suspendidos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestCreateSuspendidos"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response_Archivos"
+        "400":
+          description: Error operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EArchivos_400"
       x-openapi-router-controller: swagger_server.controllers.crear_controller
   /get/queries:
     post:
@@ -125,48 +150,79 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestLectura'
+              $ref: "#/components/schemas/RequestLectura"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response_Archivos'
+                $ref: "#/components/schemas/Response_Archivos"
         "400":
           description: Error operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EArchivos_400'
+                $ref: "#/components/schemas/EArchivos_400"
       x-openapi-router-controller: swagger_server.controllers.lectura_controller
-  /patch/modify/transacciones:
-    patch:
+  /put/modify/suspendidos:
+    post:
       tags:
       - Modificar
       description: Procesos de Modificaciones de Registro de Proveedores
-      operationId: patch_transaccion_proveedores
+      operationId: put_suspendidos
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              $ref: '#/components/schemas/RequestArchivos'
+              $ref: "#/components/schemas/RequestModifySuspendidos"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response_Archivos'
+                $ref: "#/components/schemas/Response_Archivos"
         "400":
           description: Error operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EArchivos_400'
+                $ref: "#/components/schemas/EArchivos_400"
       x-openapi-router-controller: swagger_server.controllers.modificar_controller
 components:
   schemas:
+    RequestModifySuspendidos:
+      required:
+      - channel
+      - externalTransactionId
+      - suspendido
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        proceso:
+          $ref: "#/components/schemas/M_Cliente_Suspendido"
+    RequestCreateSuspendidos:
+      required:
+      - channel
+      - externalTransactionId
+      - suspendido
+      type: object
+      properties:
+        externalTransactionId:
+          maxLength: 36
+          type: string
+          example: c6ea905e-d77c-45c0-a1ab-8d85d1d1992d
+        channel:
+          type: string
+          example: automatic-contrato-web
+        suspendido:
+          $ref: "#/components/schemas/Cliente_Suspendido"
     RequestCreateProcess:
       required:
       - channel
@@ -182,7 +238,7 @@ components:
           type: string
           example: automatic-contrato-web
         proceso:
-          $ref: '#/components/schemas/RequestCreateProcess_proceso'
+          $ref: "#/components/schemas/RequestCreateProcess_proceso"
     RequestCreateCampana:
       required:
       - campana
@@ -199,7 +255,7 @@ components:
           type: string
           example: automatic-contrato-web
         campana:
-          $ref: '#/components/schemas/Campana'
+          $ref: "#/components/schemas/Campana"
         idproceso:
           type: integer
     RequestLectura:
@@ -304,9 +360,9 @@ components:
           example: 82fb166d-c273-4840-9008-c895cf9de255
     EArchivos_400:
       oneOf:
-      - $ref: '#/components/schemas/ResponseError'
-      - $ref: '#/components/schemas/Response_Archivos'
-      - $ref: '#/components/schemas/Response_EVArchivos'
+      - $ref: "#/components/schemas/ResponseError"
+      - $ref: "#/components/schemas/Response_Archivos"
+      - $ref: "#/components/schemas/Response_EVArchivos"
     RequestCreateProcess_proceso:
       required:
       - ffin
@@ -346,4 +402,31 @@ components:
           type: string
           format: date
           example: 2024-08-08
+    Cliente_Suspendido:
+      required:
+      - cliente
+      - contrato
+      - cuenta
+      - detalle
+      - fecha_exclusion
+      properties:
+        cliente:
+          type: string
+        contrato:
+          type: number
+        cuenta:
+          type: number
+        detalle:
+          type: string
+        fecha_exclusion:
+          type: string
+    M_Cliente_Suspendido:
+      required:
+      - contrato
+      - isvalid
+      properties:
+        contrato:
+          type: number
+        isvalid:
+          type: string
 

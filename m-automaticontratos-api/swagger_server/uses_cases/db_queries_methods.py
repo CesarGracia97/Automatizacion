@@ -178,8 +178,8 @@ class DB_Queries_Methods:
             query = """SELECT IDPROCESO, NOMBRE, FIPROCESO, FFPROCESO FROM YTBL_COBRANZAS_PROCESO  WHERE ISVALID = 'Y'"""
 
             db_config.connect()
-            db_config.disconnect()
             results = db_config.fetch_results(query)
+            db_config.disconnect()
             if results:
                 # Convertir los resultados en una lista de diccionarios
                 response["procesos"] = [{"idproceso": row[0], "name": row[1], "fiproceso": row[2], "ffproceso": row[3]} for row in results]
@@ -201,7 +201,7 @@ class DB_Queries_Methods:
             # Query para obtener el IDCAMPANIA
             query = """SELECT IDCAMPANA FROM YTBL_COBRANZAS_CAMPANA
                 WHERE NOMBRE = %s AND PORC_DESCUENTO = %s AND FCREACION = %s AND FICAMPANA = %s AND FFCAMPANA = %s 
-                AND ISVALID = 'V' ORDER BY ID DESC LIMIT 1"""
+                AND ISVALID = 'Y' ORDER BY ID DESC LIMIT 1"""
             params = (campana.nombre, campana.descuento, fcreacion, campana.finicio, campana.ffin)
             db_config.connect()
             result = db_config.fetch_results(query, params)
@@ -218,15 +218,18 @@ class DB_Queries_Methods:
         db_config = MySQL_Configuration()
         response = {}
         try:
-            query = """SELECT CLIENTE, CONTRATO, CUENTA, DETALLE, FECHA_EXCLUSION, ISVALID FROM YTBl_COBRANZAS_EXCLUSION_CLIENTES
+            query = """SELECT CLIENTE, CONTRATO, CUENTA, DETALLE, FECHA_EXCLUSION, ISVALID FROM YTBL_COBRANZAS_EXCLUSION_CLIENTES
                     WHERE ISVALID = 'Y'"""
             db_config.connect()
             results = db_config.fetch_results(query)
             db_config.disconnect()
             if results:
-                response["suspendidos"] = [{"cliente": row[0], "contrato": row[1], "detalle": row[2],
-                                            "fecha_exclusion": row[3], "isvalid": row[4] } for row in results]
+                response["suspendidos"] = [{"cliente": row[0], "contrato": row[1], "cuenta": row[2], "detalle": row[3],
+                                            "fecha_exclusion": row[4], "isvalid": row[5] } for row in results]
                 response["status"] = 200
+            else:
+                response["message"] = f"O no hay datos o ejecuto mal la consulta"
+                response["status"] = 400
         except Exception as e:
             response["message"]= f"Error al ejecutar la consulta: {e}"
             response["status"]= 500

@@ -3,7 +3,6 @@ from datetime import datetime
 import calendar
 from swagger_server.utils.resource.mysql_configuration import MySQL_Configuration
 from swagger_server.uses_cases.db_queries_methods import DB_Queries_Methods
-from swagger_server.utils.tools.tools import Tools
 
 
 class DB_Insert_Methods:
@@ -113,119 +112,133 @@ class DB_Insert_Methods:
 
     @staticmethod
     def insert_data_cobros_create(files):
-        """ Procesa los archivos Excel o CSV y verifica cada registro con la consulta query_cuenta_suplantacion. """
+        """ Procesa los archivos Excel o CSV y verifica cada registro antes de insertarlo en la base de datos. """
         total_registros = 0
         registros_insertados = 0
 
         for file in files:
             try:
                 # Leer el archivo en un DataFrame de Pandas
-                df = pd.read_excel(file) if file.filename.endswith('.xls') or file.filename.endswith(
-                    '.xlsx') else pd.read_csv(file)
-
+                df = pd.read_excel(file) if file.filename.endswith('.xls') or file.filename.endswith('.xlsx') else pd.read_csv(file)
+                df.columns = df.columns.str.strip()  # Normalizar nombres de columnas
                 total_registros += len(df)
 
-                # Iterar sobre los registros del DataFrame
+                # Conectar a la base de datos una sola vez por archivo
+                db_config = MySQL_Configuration()
+                db_config.connect()
+
                 for index, row in df.iterrows():
                     cuenta_titan = row.get("CUENTA TITAN")
 
                     if pd.isna(cuenta_titan):
-                        print(f"Registro en la fila {index + 2} tiene una CUENTA TITAN vacía.")
+                        print(f"Registro en la fila {index + 2} tiene una CUENTA TITAN vacía. Saltando...")
                         continue
 
-                    # Verificar si la cuenta existe en la base de datos
-                    query = DB_Queries_Methods
+                    # Verificar si la cuenta ya existe en la base de datos
+                    query = DB_Queries_Methods()
                     cuenta_valida = query.query_cuenta_suplantacion(int(cuenta_titan))
 
                     is_valid = 'Y' if not cuenta_valida else 'N'
 
-                    # Preparar los valores para insertar en la base de datos
+                    # Preparar valores para la inserción
                     values = (
                         int(cuenta_titan),
-                        row.get("Referencia interna"),
-                        row.get("DOCUMENTO IDENTIFICACION"),
-                        row.get("NOMBRE DEL CLIENTE"),
-                        row.get("TELEFONOS"),
-                        row.get("CIUDAD"),
-                        row.get("ESTADO CUENTA"),
-                        row.get("TIPO CUENTA"),
-                        row.get("TIPO DE NEGOCIO"),
-                        row.get("FORMA DE PAGO"),
-                        row.get("TRANSACCION"),
-                        row.get("NOM_TRANSACCION"),
-                        row.get("# FAC PEN CARGA"),
-                        row.get("# FACTURAS PENDIENTE"),
-                        row.get("SALDO ORIGINAL VENC"),
-                        row.get("GESTION COBRANZA TOTAL"),
-                        row.get("TOTAL A PAGAR VENCIDO"),
-                        row.get("SALDO ACTUAL"),
-                        row.get("TOTAL A PAGAR"),
-                        row.get("MOVIMIENTOS (+)"),
-                        row.get("MOVIMIENTOS (-)"),
-                        row.get("TOTAL PAGO"),
-                        row.get("Valor ajuste"),
-                        row.get("ESTADO_LIQUIDACION"),
-                        row.get("LIQ. GC POR VALIDAR"),
-                        row.get("Gestion OK GC_NO GC"),
-                        row.get("Fecha pago"),
-                        row.get("[RESUMEN CONTACTO IVR]"),
-                        row.get("Fecha IVR"),
-                        row.get("[RESUMEN CONTACTO LLAMADA]"),
-                        row.get("Fecha llamada"),
-                        row.get("[LIQ. TVCABLE]"),
-                        row.get("CONVENIO"),
-                        row.get("Respaldo"),
-                        row.get("CORREO CLIENTE"),
-                        row.get("EMAIL_CAMPAÑA"),
-                        row.get("CELULAR CAMPAÑA"),
-                        row.get("Fecha terminacion"),
-                        row.get("Empresa"),
-                        row.get("Dias Vencidos"),
+                        int(str(row.get("Referencia interna", 0))) if not pd.isna(row.get("Referencia interna")) else 0,
+                        row.get("DOCUMENTO IDENTIFICACION", "") if not pd.isna(row.get("DOCUMENTO IDENTIFICACION")) else "",
+                        row.get("NOMBRE DEL CLIENTE", "") if not pd.isna(row.get("NOMBRE DEL CLIENTE")) else "",
+                        row.get("TELEFONOS", "") if not pd.isna(row.get("TELEFONOS")) else "",
+
+                        row.get("CIUDAD", "") if not pd.isna(row.get("CIUDAD")) else "",
+                        row.get("ESTADO CUENTA", "") if not pd.isna(row.get("ESTADO CUENTA")) else "",
+                        row.get("TIPO CUENTA", "") if not pd.isna(row.get("TIPO CUENTA")) else "",
+                        row.get("TIPO DE NEGOCIO", "") if not pd.isna(row.get("TIPO DE NEGOCIO")) else "",
+                        row.get("FORMA DE PAGO", "") if not pd.isna(row.get("FORMA DE PAGO")) else "",
+
+                        int(str(row.get("TRANSACCION", 0))) if not pd.isna(row.get("TRANSACCION")) else 0,
+                        row.get("NOM_TRANSACCION", "") if not pd.isna(row.get("NOM_TRANSACCION")) else "",
+                        row.get("# FAC PEN CARGA", "") if not pd.isna(row.get("# FAC PEN CARGA")) else "",
+                        row.get("# FACTURAS PENDIENTE", "") if not pd.isna(row.get("# FACTURAS PENDIENTE")) else "",
+                        float(str(row.get("SALDO ORIGINAL VENC", 0.00)).replace(",", ".")) if not pd.isna(row.get("SALDO ORIGINAL VENC")) else 0.00,
+
+                        float(str(row.get("GESTION COBRANZA TOTAL", 0.00)).replace(",", ".")) if not pd.isna(row.get("GESTION COBRANZA TOTAL")) else 0.00,
+                        float(str(row.get("TOTAL A PAGAR VENCIDO", 0.00)).replace(",", ".")) if not pd.isna(row.get("TOTAL A PAGAR VENCIDO")) else 0.00,
+                        float(str(row.get("SALDO ACTUAL", 0.00)).replace(",", ".")) if not pd.isna(row.get("SALDO ACTUAL")) else 0.00,
+                        float(str(row.get("TOTAL A PAGAR", 0.00)).replace(",", ".")) if not pd.isna(row.get("TOTAL A PAGAR")) else 0.00,
+                        float(str(row.get("MOVIMIENTOS (+)", 0.00)).replace(",", ".")) if not pd.isna(row.get("MOVIMIENTOS (+)")) else 0.00,
+
+                        float(str(row.get("MOVIMIENTOS (-)", 0.00)).replace(",", ".")) if not pd.isna(row.get("MOVIMIENTOS (-)")) else 0.00,
+                        float(str(row.get("TOTAL PAGO", 0.00)).replace(",", ".")) if not pd.isna(row.get("TOTAL PAGO")) else 0.00,
+                        float(str(row.get("Valor ajuste", 0.00)).replace(",", ".")) if not pd.isna(row.get("Valor ajuste")) else 0.00,
+                        row.get("ESTADO_LIQUIDACION", "") if not pd.isna(row.get("ESTADO_LIQUIDACION")) else "",
+                        float(str(row.get("LIQ. GC POR VALIDAR", 0.00)).replace(",", ".")) if not pd.isna(row.get("LIQ. GC POR VALIDAR")) else 0.00,
+
+                        row.get("Gestion OK GC_NO GC", "") if not pd.isna(row.get("Gestion OK GC_NO GC")) else "",
+                        row.get("Fecha pago", None) if not pd.isna(row.get("Fecha pago")) else None,
+                        row.get("[RESUMEN CONTACTO IVR]", "") if not pd.isna(row.get("[RESUMEN CONTACTO IVR]")) else "",
+                        row.get("Fecha IVR", None) if not pd.isna(row.get("Fecha IVR")) else None,
+                        row.get("[RESUMEN CONTACTO LLAMADA]", "") if not pd.isna(row.get("[RESUMEN CONTACTO LLAMADA]")) else "",
+
+                        row.get("Fecha llamada", None) if not pd.isna(row.get("Fecha llamada")) else None,
+                        row.get("[LIQ. TVCABLE]", "") if not pd.isna(row.get("[LIQ. TVCABLE]")) else "",
+                        row.get("CONVENIO", "") if not pd.isna(row.get("CONVENIO")) else "",
+                        int(str(row.get("Respaldo", "0"))) if not pd.isna(row.get("Respaldo")) else 0,
+                        row.get("CORREO CLIENTE", "") if not pd.isna(row.get("CORREO CLIENTE")) else "",
+
+                        row.get("EMAIL_CAMPAÑA", "") if not pd.isna(row.get("EMAIL_CAMPAÑA")) else "",
+                        row.get("CELULAR CAMPAÑA", "") if not pd.isna(row.get("CELULAR CAMPAÑA")) else "",
+                        row.get("Fecha terminacion", None) if not pd.isna(row.get("Fecha terminacion")) else None,
+                        row.get("Empresa", "") if not pd.isna(row.get("Empresa")) else "",
+                        int(str(row.get("Dias Vencidos", "0"))) if not pd.isna(row.get("Dias Vencidos")) else 0,
+
                         datetime.now().date(),
                         file.filename,
                         is_valid
                     )
 
-                    # Insertar los datos en la base de datos
-                    query = """
-                        INSERT INTO YTBL_COBRANZAS_BASE_COBRANZAS (
-                            CUENTA, REFERENCIA_INTERNA, DOCUMENTO_IDENTIFICACION, NOMBRE_CLIENTE, TELEFONOS, CIUDAD,
-                            ESTADO_CUENTA, TIPO_CUENTA, TIPO_NEGOCIO, FORMA_PAGO, TRANSACCION, NOM_TRANSACCION,
-                            NFACPEN_CARGA, NFACTURAS_PENDIENTE, SALDO_ORIGINAL_VENC, GESTION_COBRANZA_TOTAL,
-                            TOTAL_A_PAGAR_VENCIDO, SALDO_ACTUAL, TOTAL_A_PAGAR, MOVIMIENTOS_POS, MOVIMIENTOS_NEG,
-                            TOTAL_PAGO, VALOR_AJUSTE, ESTADO_LIQUIDACION, LIQ_GC_POR_VALIDAR, GESTION_OK_GC_NO_GC,
-                            FECHA_PAGO, RESUMEN_CONTACTO_IVR, FECHA_IVR, RESUMEN_CONTACTO_LLAMADA, FECHA_LLAMADA,
-                            LIQ_TVCABLE, CONVENIO, RESPALDO, CORREO_CLIENTE, EMAIL_CAMPANA, CELULAR_CAMPANA,
-                            FECHA_TERMINACION, EMPRESA, DIAS_VENCIDOS, FECHA_CREACION, NOMBRE_ARCHIVO, ISVALID
+                    # Query de inserción
+                    insert_query = """
+                        INSERT INTO YTBL_COBRANZAS_BASE (
+                        CUENTA, REFERENCIA_INTERNA, DOCUMENTO_IDENTIFICACION, NOMBRE_CLIENTE, TELEFONOS, 
+                        CIUDAD, ESTADO_CUENTA, TIPO_CUENTA, TIPO_NEGOCIO, FORMA_PAGO,
+                        TRANSACCION, NOM_TRANSACCION, NFACPEN_CARGA, NFACTURAS_PENDIENTE, SALDO_ORIGINAL_VENC, 
+                        GESTION_COBRANZA_TOTAL, TOTAL_A_PAGAR_VENCIDO, SALDO_ACTUAL, TOTAL_A_PAGAR, MOVIMIENTOS_POS,
+                        MOVIMIENTOS_NEG, TOTAL_PAGO, VALOR_AJUSTE, ESTADO_LIQUIDACION, LIQ_GC_POR_VALIDAR, 
+                        GESTION_OK_GC_NO_GC, FECHA_PAGO, RESUMEN_CONTACTO_IVR, FECHA_IVR, RESUMEN_CONTACTO_LLAMADA,
+                        FECHA_LLAMADA, LIQ_TVCABLE, CONVENIO, RESPALDO, CORREO_CLIENTE,
+                        EMAIL_CAMPANA, CELULAR_CAMPANA, FECHA_TERMINACION, EMPRESA, DIAS_VENCIDOS,
+                        FECHA_CREACION, NOMBRE_ARCHIVO, ISVALID
                         ) VALUES (
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s
                         )
                     """
-                    db_config = MySQL_Configuration()
-                    db_config.connect()
-                    db_config.execute_query(query, values)
-                    db_config.disconnect()
+                    try:
+                        result = db_config.execute_query(insert_query, values)
+                        if result:
+                            registros_insertados += 1
+                            print(f"Registro insertado con éxito: CUENTA {cuenta_titan}")
+                        else:
+                            print(f"⚠️ Error al insertar CUENTA {cuenta_titan}. No se realizó la operación.")
+                    except Exception as e:
+                        print(f"❌ Error al insertar CUENTA {cuenta_titan}: {str(e)}")
 
-                    registros_insertados += 1
-                    print(f"Registro de la cuenta {cuenta_titan} insertado con éxito.")
+                db_config.disconnect()
 
             except Exception as e:
-                return {
-                    "message": str(e),
-                    "status": 400
-                }
+                return {"message": str(e), "status": 400}
 
         if registros_insertados == total_registros:
-            return {
-                "message": "Todos los registros de BD fueron guardados correctamente",
-                "status": 200
-            }
+            return {"message": "Todos los registros de BD fueron guardados correctamente", "status": 200}
         else:
-            return {
-                "message": f"Se procesaron {registros_insertados}/{total_registros} registros.",
-                "status": 204
-            }
+            return {"message": f"Se procesaron {registros_insertados}/{total_registros} registros.", "status": 204}
+
 
     @staticmethod
     def insert_data_proceso_create(data):
@@ -270,7 +283,7 @@ class DB_Insert_Methods:
             fcreacion = datetime.now().date()
             query = """INSERT INTO YTBL_COBRANZAS_CAMPANA (NOMBRE, PORC_DESCUENTO, FCREACION, FICAMPANA, FFCAMPANA, ISVALID)
                 VALUES (%s, %s, %s, %s, %s, %s)"""
-            params = (campana.nombre, campana.descuento, fcreacion, campana.finicio, campana.ffin, 'V')
+            params = (campana.nombre, campana.descuento, fcreacion, campana.finicio, campana.ffin, 'Y')
             db_config.connect()
             db_config.execute_query(query, params)
             db_config.disconnect()
@@ -297,9 +310,31 @@ class DB_Insert_Methods:
             db_config = MySQL_Configuration()
             query = """ INSERT INTO YTBL_COBRANZAS_PROCESO_CAMPANA(IDPROCESO, IDCAMPANA, FCREACION, FINICIO, FECHAFIN, ISVALID)
             VALUES (%s, %s, %s, %s, %s, %s)"""
-            params = (idProceso, idCampana, fcreacion, campana.finicio, campana.ffin, 'V')
+            params = (idProceso, idCampana, fcreacion, campana.finicio, campana.ffin, 'Y')
             db_config.connect()
             db_config.execute_query(query, params)
             db_config.disconnect()
         except Exception as e:
             raise Exception(f"Error al insertar la relacion: {e}")
+
+    @staticmethod
+    def insert_data_suspendidos(suspendido):
+        """"""
+        response = {}
+        db_config = MySQL_Configuration()
+        try:
+            fcreacion = datetime.now().date()
+            query = """INSERT INTO YTBL_COBRANZAS_EXCLUSION_CLIENTES (CUENTA, CLIENTE, CONTRATO, DETALLE, FECHA_EXCLUSION, 
+            FECHA_CREACION, NAME_FILE, ISVALID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+            params = (suspendido.cuenta, suspendido.cliente, suspendido.contrato, suspendido.detalle,
+                      suspendido.fecha_exclusion, fcreacion, 'WEB_CONTRATOS', 'Y')
+            db_config.connect()
+            db_config.execute_query(query, params)
+            db_config.disconnect()
+            response["status"] = 200
+            response["message"] = "Datos insertados correctamente en la tabla YTBL_COBRANZAS_EXCLUSION_CLIENTES."
+        except Exception as e:
+            response["status"] = 500
+            response["message"] = f"Error al insertar datos: {e}"
+        finally:
+            return response

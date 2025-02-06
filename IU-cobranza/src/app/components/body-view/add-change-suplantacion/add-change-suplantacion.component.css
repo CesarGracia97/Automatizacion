@@ -206,3 +206,46 @@
   width: 40px;
 }
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5px;
+  font-size: 7.5pt;
+  text-align: left;
+
+}
+
+th, td {
+  padding: 5px;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #007BFF;
+  color: white;
+  text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #d1ecf1;
+  cursor: pointer;
+}
+
+td {
+  color: #333;
+}
+
+@media screen and (max-width: 768px) {
+  table {
+    font-size: 5pt;
+  }
+  th, td {
+    padding: 5px;
+  }
+}
+
+

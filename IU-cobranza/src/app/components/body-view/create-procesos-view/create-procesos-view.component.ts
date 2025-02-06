@@ -82,4 +82,8 @@ export class CreateProcesosViewComponent {
       },
     });
   }
+
+  closeModal():void {
+    this.com.state_4_modal_visualization(false, 'proceso')
+  }
 }

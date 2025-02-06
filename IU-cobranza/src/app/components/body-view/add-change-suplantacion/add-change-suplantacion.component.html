@@ -40,7 +40,28 @@
             </div>
             <div class="body_mod" *ngIf="mod">
                 <div class="main_mod">
-
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CUENTA</th>
+                                <th>CLIENTE</th>
+                                <th>CONTRATO</th>
+                                <th>DETALLES</th>
+                                <th>FECHA dDE EXCLUSION</th>
+                                <th>ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let suplentes of c_suplentes">
+                                <td>{{ suplentes.cuenta }}</td>
+                                <td>{{ suplentes.cliente }}</td>
+                                <td>{{ suplentes.contrato }}</td>
+                                <td>{{ suplentes.detalle }}</td>
+                                <td>{{ suplentes.fecha_exclusion }}</td>
+                                <td>{{ suplentes.isvalid === 'Y' ? 'ACTIVO' : 'INACTIVO' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="button_mod">
                     <button class="btn_mod">Modificar Cliente Suspendido</button>

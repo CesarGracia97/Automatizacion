@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { UuidgeneratorService } from '../../utils/uuidgenerator.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/internal/Observable';
-import { S_AvailableMonths, S_AvailableProcess, S_LastUpdate } from '../../interfaces/response/response_success.interface';
+import { S_AvailableMonths, S_AvailableProcess, S_ClientesSuspendidos, S_LastUpdate } from '../../interfaces/response/response_success.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -39,5 +39,15 @@ export class FetchDataService {
       'peticion': "procesos"
     };
     return this.http.post<S_AvailableProcess>('http://127.0.0.1:2014/rest/m-automaticontratos-api/v1.0/get/queries', body, { headers });
+  }
+
+  query_ClientesSuspendidos(): Observable<S_ClientesSuspendidos>{
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const body = {
+      'channel': 'automatic-contrato-web',
+      'externalTransactionId': this.uuidService.generateUUID(),
+      'peticion': "clientes-suspendidos"
+    };
+    return this.http.post<S_ClientesSuspendidos>('http://127.0.0.1:2014/rest/m-automaticontratos-api/v1.0/get/queries', body, { headers });
   }
 }

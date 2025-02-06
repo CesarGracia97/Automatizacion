@@ -13,7 +13,7 @@ export class DataStorageService {
   dProcesoshabilitados$ = this.dProcesoshabilitados_Subject.asObservable();
 
   private dClientesSuspendidos_Subject = new BehaviorSubject<S_ClientesSuspendidos | null>(null);
-  dClientesSuspendidos = this.dClientesSuspendidos_Subject.asObservable();
+  dClientesSuspendidos$ = this.dClientesSuspendidos_Subject.asObservable();
 
   constructor() {}
 

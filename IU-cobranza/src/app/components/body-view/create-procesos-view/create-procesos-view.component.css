@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 /* Overlay que bloquea el resto de la pantalla */
 .modal-overlay {
   position: fixed;
@@ -10,6 +11,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Estilo del modal */
@@ -30,6 +32,12 @@
   flex-direction: row;
 }
 
+.header_modal{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .body_modal{
   display: flex;
   flex-direction: column;
@@ -39,9 +47,27 @@
 .body_header{
   display: flex;
   flex-direction: row;
+  gap: 10px;
+  font-size: 9pt;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .content_select, .content_name, .content_calendar_1, .content_calendar_2{
   display: flex;
   flex-direction: column;
+  padding: 5px;
+}
+
+.close{
+  cursor: pointer;
+  width: 40px;
 }

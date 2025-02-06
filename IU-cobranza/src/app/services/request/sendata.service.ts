@@ -31,4 +31,24 @@ export class SendDataService {
     };
     return this.http.post<S_Charge>('http://127.0.0.1:2014/rest/m-automaticontratos-api/v1.0/post/create/campanas', body, { headers });
   }
+
+  sendDataCreateClientesSuspendidos(data:{ [key: string]: any }): Observable<S_Charge> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const body = {
+      'channel': 'automatic-contrato-web',
+      'externalTransactionId': this.uuidService.generateUUID(),
+      'suspendido': data
+    };
+    return this.http.post<S_Charge>('http://127.0.0.1:2014/rest/m-automaticontratos-api/v1.0/post/create/suspendidos', body, { headers });
+  }
+
+  sendDataActualizarClienteSuspendido(data:{ [key: string]: any }): Observable<S_Charge> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const body = {
+      'channel': 'automatic-contrato-web',
+      'externalTransactionId': this.uuidService.generateUUID(),
+      'suspendido': data
+    };
+    return this.http.post<S_Charge>('http://127.0.0.1:2014/rest/m-automaticontratos-api/v1.0/put/modify/suspendidos:', body, { headers });
+  }
 }
